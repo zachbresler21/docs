@@ -4,7 +4,7 @@
   "name": "Pager Documentation",
   "colors": {
     "primary": "#2563EB",
-    "light": "#3B82F6", 
+    "light": "#3B82F6",
     "dark": "#1D4ED8"
   },
   "favicon": "/favicon.svg",
@@ -104,7 +104,7 @@
       "anchors": [
         {
           "anchor": "GitHub",
-          "href": "https://github.com/your-org/pager",
+          "href": "https://github.com/HeroTools/pager",
           "icon": "github"
         },
         {
@@ -134,18 +134,18 @@
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/your-org/pager",
+      "github": "https://github.com/HeroTools/pager",
       "x": "https://x.com/pagerapp"
     }
   }
