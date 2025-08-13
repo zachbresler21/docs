@@ -1,0 +1,279 @@
+---
+title: "Create Webhook"
+api: "POST /api/workspaces/{workspaceId}/webhooks"
+description: "Create a new webhook integration for your workspace"
+---
+
+Creates a new webhook endpoint that external services can use to send notifications to your Pager workspace.
+
+## Authentication
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for workspace authentication
+</ParamField>
+
+## Path Parameters
+
+<ParamField path="workspaceId" type="string" required>
+  The unique identifier for your workspace
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="name" type="string" required>
+  A descriptive name for the webhook (max 100 characters)
+</ParamField>
+
+<ParamField body="source_type" type="string" required>
+  The type of service this webhook will receive events from
+  <Expandable title="Supported Values" defaultOpen>
+    - `github` - GitHub repository events
+    - `linear` - Linear issue tracking updates  
+    - `jira` - Jira project management events
+    - `stripe` - Stripe payment and subscription events
+    - `custom` - General-purpose webhook for any service
+  </Expandable>
+</ParamField>
+
+<ParamField body="channel_id" type="string">
+  The ID of the channel where webhook notifications will be posted. Required for all source types except `custom`.
+</ParamField>
+
+<ParamField body="signing_secret" type="string">
+  Optional signing secret for webhook verification. Highly recommended for production use.
+  <Note>
+    For Stripe webhooks, this can be added after initial creation when you get the signing secret from Stripe Dashboard.
+  </Note>
+</ParamField>
+
+<ParamField body="description" type="string">
+  Optional description of the webhook's purpose (max 500 characters)
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  Unique identifier for the created webhook
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  The webhook name as provided in the request
+</ResponseField>
+
+<ResponseField name="source_type" type="string">
+  The service type for this webhook
+</ResponseField>
+
+<ResponseField name="webhook_url" type="string">
+  The unique URL endpoint that external services should send events to
+</ResponseField>
+
+<ResponseField name="channel_id" type="string">
+  The target channel ID for notifications
+</ResponseField>
+
+<ResponseField name="channel_name" type="string">
+  The name of the target channel
+</ResponseField>
+
+<ResponseField name="is_active" type="boolean">
+  Whether the webhook is currently active and processing events
+</ResponseField>
+
+<ResponseField name="has_signing_secret" type="boolean">
+  Whether a signing secret is configured for this webhook
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  ISO timestamp when the webhook was created
+</ResponseField>
+
+<ResponseField name="created_by_name" type="string">
+  Name of the user who created the webhook
+</ResponseField>
+
+<ResponseField name="message_count" type="number">
+  Total number of messages posted by this webhook (starts at 0)
+</ResponseField>
+
+<ResponseField name="total_requests" type="number">
+  Total number of HTTP requests received by this webhook (starts at 0)
+</ResponseField>
+
+## Example Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.pager.team/api/workspaces/ws_abc123/webhooks" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Backend Repository Updates",
+    "source_type": "github", 
+    "channel_id": "ch_def456",
+    "signing_secret": "your_github_webhook_secret",
+    "description": "Notifications for commits, PRs, and issues in the backend repo"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('/api/workspaces/ws_abc123/webhooks', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer your_access_token',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'Backend Repository Updates',
+    source_type: 'github',
+    channel_id: 'ch_def456', 
+    signing_secret: 'your_github_webhook_secret',
+    description: 'Notifications for commits, PRs, and issues in the backend repo'
+  })
+});
+
+const webhook = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.pager.team/api/workspaces/ws_abc123/webhooks',
+    headers={
+        'Authorization': 'Bearer your_access_token',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'name': 'Backend Repository Updates',
+        'source_type': 'github',
+        'channel_id': 'ch_def456',
+        'signing_secret': 'your_github_webhook_secret', 
+        'description': 'Notifications for commits, PRs, and issues in the backend repo'
+    }
+)
+
+webhook = response.json()
+```
+
+</CodeGroup>
+
+## Example Response
+
+<CodeGroup>
+
+```json 201 Created
+{
+  "id": "wh_xyz789",
+  "name": "Backend Repository Updates",
+  "source_type": "github",
+  "webhook_url": "https://api.pager.team/webhooks/wh_xyz789",
+  "channel_id": "ch_def456",
+  "channel_name": "backend-notifications", 
+  "is_active": true,
+  "has_signing_secret": true,
+  "created_at": "2024-01-15T10:30:00Z",
+  "created_by_name": "John Doe",
+  "message_count": 0,
+  "total_requests": 0,
+  "description": "Notifications for commits, PRs, and issues in the backend repo"
+}
+```
+
+```json 400 Bad Request
+{
+  "error": "Invalid source_type provided",
+  "message": "source_type must be one of: github, linear, jira, stripe, custom",
+  "code": "INVALID_SOURCE_TYPE"
+}
+```
+
+```json 403 Forbidden  
+{
+  "error": "Insufficient permissions",
+  "message": "Only workspace administrators can create webhooks",
+  "code": "INSUFFICIENT_PERMISSIONS"
+}
+```
+
+```json 409 Conflict
+{
+  "error": "Webhook limit exceeded", 
+  "message": "Maximum of 5 GitHub webhooks allowed per workspace",
+  "code": "WEBHOOK_LIMIT_EXCEEDED"
+}
+```
+
+</CodeGroup>
+
+## Webhook Limits
+
+Each workspace has limits to ensure optimal performance:
+
+<ResponseField name="Per Service Type" type="object">
+  - **GitHub**: 5 webhooks maximum
+  - **Linear**: 5 webhooks maximum  
+  - **Jira**: 5 webhooks maximum
+  - **Stripe**: 5 webhooks maximum
+  - **Custom**: 5 webhooks maximum
+</ResponseField>
+
+<ResponseField name="Total Limit" type="number">
+  25 webhooks maximum per workspace across all service types
+</ResponseField>
+
+<ResponseField name="Rate Limits" type="object">
+  - **Request Rate**: 1000 requests per hour per webhook
+  - **Payload Size**: 1MB maximum per request
+  - **Timeout**: 30 seconds maximum processing time
+</ResponseField>
+
+## Error Codes
+
+<ResponseField name="INVALID_SOURCE_TYPE" type="400">
+  The provided source_type is not supported
+</ResponseField>
+
+<ResponseField name="INVALID_CHANNEL" type="400">
+  The specified channel_id does not exist or is not accessible
+</ResponseField>
+
+<ResponseField name="WEBHOOK_LIMIT_EXCEEDED" type="409">
+  Maximum number of webhooks reached for this service type or workspace
+</ResponseField>
+
+<ResponseField name="INSUFFICIENT_PERMISSIONS" type="403">
+  User does not have admin permissions required to create webhooks
+</ResponseField>
+
+<ResponseField name="WORKSPACE_NOT_FOUND" type="404">
+  The specified workspace does not exist or is not accessible
+</ResponseField>
+
+## Usage Notes
+
+<Warning>
+  **Signing Secrets**: Always use signing secrets in production environments to verify webhook authenticity. Without signing secrets, webhooks cannot verify that requests are coming from the legitimate external service.
+</Warning>
+
+<Note>
+  **Stripe Workflow**: For Stripe webhooks, you can create the webhook without a signing secret initially, then add the signing secret after configuring the endpoint in your Stripe Dashboard. This is because Stripe only provides the signing secret after you create the webhook endpoint.
+</Note>
+
+<Tip>
+  **Channel Selection**: Choose channels that are actively monitored by team members who need to act on webhook notifications. Consider creating dedicated channels for different types of notifications.
+</Tip>
+
+## Next Steps
+
+After creating a webhook:
+
+1. **Configure External Service**: Add the `webhook_url` to your external service's webhook settings
+2. **Select Events**: Choose which events the external service should send to this webhook
+3. **Test Integration**: Trigger a test event to verify the webhook is working correctly
+4. **Monitor Activity**: Check the webhook dashboard for delivery statistics and any errors
+
+<Card title="Webhook Setup Guide" icon="cog" href="/integrations/webhooks/setup">
+  Complete guide to configuring webhooks with external services
+</Card>

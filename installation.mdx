@@ -1,0 +1,506 @@
+---
+title: "Installation & Deployment"
+description: "Deploy Pager on your own infrastructure or use our hosted solution"
+---
+
+Pager offers flexible deployment options to meet your team's needs. Choose between our hosted cloud solution for instant setup or self-hosted deployment for complete control over your data and infrastructure.
+
+## Deployment Options
+
+<Tabs>
+  <Tab title="Cloud Hosted (Recommended)">
+    **Perfect for**: Most teams wanting to get started quickly
+    
+    **Benefits**:
+    - ✅ Instant setup in under 5 minutes
+    - ✅ Automatic updates and security patches
+    - ✅ Built-in backups and disaster recovery
+    - ✅ 99.9% uptime SLA
+    - ✅ No infrastructure management required
+    
+    **Get Started**: [app.pager.team](https://app.pager.team)
+  </Tab>
+  
+  <Tab title="Self-Hosted">
+    **Perfect for**: Organizations with strict data requirements
+    
+    **Benefits**:
+    - ✅ Complete data control and privacy
+    - ✅ Custom deployment configurations
+    - ✅ Integration with existing infrastructure
+    - ✅ Advanced security customization
+    - ✅ No data leaves your environment
+    
+    **Requirements**: AWS account and technical expertise
+  </Tab>
+</Tabs>
+
+## Cloud Hosted Setup
+
+The fastest way to get started with Pager:
+
+<Steps>
+  <Step title="Sign Up">
+    Visit [app.pager.team](https://app.pager.team) and create your account using email or Google OAuth
+  </Step>
+  
+  <Step title="Create Workspace">
+    Set up your team workspace with a descriptive name and invite your first team members
+  </Step>
+  
+  <Step title="Configure Integrations">
+    Connect your favorite tools using our webhook integrations for GitHub, Linear, Stripe, and more
+  </Step>
+  
+  <Step title="Start Collaborating">
+    Begin messaging, create AI agents, and enhance your team's productivity
+  </Step>
+</Steps>
+
+<Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+  Follow our complete quickstart guide for detailed setup instructions
+</Card>
+
+## Self-Hosted Deployment
+
+Deploy Pager on your own AWS infrastructure for complete control.
+
+### System Requirements
+
+<Tabs>
+  <Tab title="AWS Services">
+    **Required AWS Services**:
+    - **Lambda**: Serverless compute for backend functions
+    - **API Gateway**: REST API management
+    - **RDS**: PostgreSQL database (or compatible)
+    - **S3**: File storage and static assets
+    - **CloudFormation**: Infrastructure as code
+    - **Secrets Manager**: Secure configuration storage
+    - **CloudWatch**: Logging and monitoring
+  </Tab>
+  
+  <Tab title="Development Environment">
+    **Local Development Requirements**:
+    - **Node.js**: 18.17.0 or higher
+    - **AWS CLI**: Configured with appropriate permissions
+    - **SAM CLI**: For serverless deployment
+    - **Docker**: For local testing and builds
+    - **Git**: Version control
+  </Tab>
+  
+  <Tab title="Third-Party Services">
+    **External Dependencies**:
+    - **Supabase**: Database and real-time subscriptions
+    - **OpenAI**: AI agent functionality
+    - **Google OAuth**: Authentication (optional)
+  </Tab>
+</Tabs>
+
+### Pre-Deployment Setup
+
+<Steps>
+  <Step title="AWS Configuration">
+    Set up your AWS environment:
+    
+    <CodeGroup>
+    ```bash AWS CLI Configuration
+    # Configure AWS CLI with your credentials
+    aws configure
+    
+    # Verify access to required services
+    aws sts get-caller-identity
+    aws lambda list-functions --max-items 1
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Clone Repository">
+    Get the Pager source code:
+    
+    <CodeGroup>
+    ```bash Clone Repositories
+    # Clone frontend repository
+    git clone https://github.com/your-org/pager-frontend.git
+    cd pager-frontend
+    
+    # Clone backend repository  
+    git clone https://github.com/your-org/pager-backend.git
+    cd pager-backend
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Install Dependencies">
+    Install required packages:
+    
+    <CodeGroup>
+    ```bash Frontend Dependencies
+    cd pager-frontend
+    npm install
+    
+    # Install development tools
+    npm install -g @vercel/cli
+    ```
+    
+    ```bash Backend Dependencies
+    cd pager-backend
+    npm install
+    
+    # Install SAM CLI (macOS with Homebrew)
+    brew install aws-sam-cli
+    
+    # Or using npm
+    npm install -g @aws-sam/cli
+    ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+### Backend Deployment
+
+Deploy the serverless backend to AWS:
+
+<Steps>
+  <Step title="Configure Parameters">
+    Set up your deployment configuration:
+    
+    <CodeGroup>
+    ```json config/parameters.json
+    {
+      "openai_api_key": "sk-your-openai-api-key",
+      "supabase_url": "https://your-project.supabase.co",
+      "supabase_service_role_key": "your-service-role-key",
+      "supabase_anon_key": "your-anon-key",
+      "google_client_id": "your-google-oauth-client-id",
+      "google_client_secret": "your-google-oauth-secret",
+      "jwt_secret": "your-secure-jwt-secret",
+      "environment": "production"
+    }
+    ```
+    </CodeGroup>
+    
+    <Warning>
+      Store sensitive values in AWS Secrets Manager for production deployments
+    </Warning>
+  </Step>
+  
+  <Step title="Build and Deploy">
+    Deploy the backend services:
+    
+    <CodeGroup>
+    ```bash Deploy Backend
+    # Build and deploy using SAM
+    sam build
+    sam deploy --guided
+    
+    # Follow the prompts to configure:
+    # - Stack name (e.g., pager-backend-prod)
+    # - AWS region (e.g., us-east-1)
+    # - Confirm changes and create IAM roles
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Note API Gateway URL">
+    After deployment, save the API Gateway URL from the outputs:
+    
+    <CodeGroup>
+    ```bash Get Outputs
+    aws cloudformation describe-stacks \
+      --stack-name pager-backend-prod \
+      --query 'Stacks[0].Outputs'
+    ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+### Frontend Deployment
+
+Deploy the Next.js frontend application:
+
+<Steps>
+  <Step title="Configure Environment">
+    Set up environment variables:
+    
+    <CodeGroup>
+    ```bash .env.production
+    NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+    OPENAI_API_KEY=sk-your-openai-api-key
+    NEXT_PUBLIC_API_GATEWAY_URL=https://your-api-gateway.amazonaws.com/prod
+    NEXT_PUBLIC_APP_URL=https://your-domain.com
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Deploy to Vercel">
+    Deploy using Vercel (recommended):
+    
+    <CodeGroup>
+    ```bash Deploy to Vercel
+    # Install Vercel CLI if not already installed
+    npm install -g vercel
+    
+    # Deploy to Vercel
+    vercel --prod
+    
+    # Configure environment variables in Vercel dashboard
+    # or using CLI:
+    vercel env add NEXT_PUBLIC_SUPABASE_URL production
+    vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY production
+    # ... add all environment variables
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Alternative: AWS Deployment">
+    Deploy to AWS using Serverless Next.js:
+    
+    <CodeGroup>
+    ```bash AWS Frontend Deploy
+    # Build for production
+    npm run build
+    
+    # Deploy to S3 + CloudFront
+    npx @serverless/aws
+    
+    # Or use AWS Amplify
+    amplify init
+    amplify add hosting
+    amplify publish
+    ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+### Database Setup
+
+Configure your PostgreSQL database:
+
+<Steps>
+  <Step title="Supabase Setup">
+    Create a new Supabase project:
+    
+    1. Visit [supabase.com](https://supabase.com) and create a new project
+    2. Note your project URL and API keys
+    3. Configure authentication providers (Google OAuth, email/password)
+    4. Set up row-level security policies
+  </Step>
+  
+  <Step title="Database Schema">
+    Run the database migrations:
+    
+    <CodeGroup>
+    ```sql Initial Schema
+    -- Run these SQL commands in your Supabase SQL editor
+    -- or use the migration files in supabase/migrations/
+    
+    -- Enable required extensions
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    CREATE EXTENSION IF NOT EXISTS "vector";
+    
+    -- Create initial tables
+    -- (Schema files available in the repository)
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Real-time Configuration">
+    Enable real-time subscriptions:
+    
+    <CodeGroup>
+    ```sql Real-time Setup
+    -- Enable realtime for required tables
+    ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+    ALTER PUBLICATION supabase_realtime ADD TABLE channels;
+    ALTER PUBLICATION supabase_realtime ADD TABLE workspaces;
+    ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+## Development Environment
+
+Set up a local development environment:
+
+### Frontend Development
+
+<Steps>
+  <Step title="Environment Configuration">
+    <CodeGroup>
+    ```bash .env.local
+    NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-local-anon-key
+    SUPABASE_SERVICE_ROLE_KEY=your-local-service-key
+    OPENAI_API_KEY=sk-your-openai-api-key
+    NEXT_PUBLIC_API_GATEWAY_URL=http://localhost:8081
+    NEXT_PUBLIC_APP_URL=http://localhost:3000
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Start Development Server">
+    <CodeGroup>
+    ```bash Development Server
+    cd pager-frontend
+    npm run dev
+    
+    # Frontend will be available at http://localhost:3000
+    ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+### Backend Development
+
+<Steps>
+  <Step title="Local API Testing">
+    <CodeGroup>
+    ```bash Local Backend
+    cd pager-backend
+    sam local start-api --port 8081
+    
+    # API will be available at http://localhost:8081
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Function Testing">
+    <CodeGroup>
+    ```bash Test Individual Functions
+    # Test a specific Lambda function
+    sam local invoke WorkspacesFunction \
+      --event events/get-workspaces.json
+    
+    # Test with debugging
+    sam local invoke --debug-port 5858 WorkspacesFunction
+    ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+## Production Configuration
+
+### Security Hardening
+
+<AccordionGroup>
+  <Accordion title="Environment Security">
+    - **Use AWS Secrets Manager** for all sensitive configuration
+    - **Enable VPC** for Lambda functions if required
+    - **Configure WAF** on API Gateway for DDoS protection
+    - **Set up CloudTrail** for audit logging
+    - **Enable GuardDuty** for threat detection
+  </Accordion>
+  
+  <Accordion title="Database Security">
+    - **Enable RLS policies** in Supabase
+    - **Use connection pooling** for Lambda database connections
+    - **Configure backup retention** policies
+    - **Set up monitoring** and alerting
+    - **Enable SSL/TLS** for all database connections
+  </Accordion>
+  
+  <Accordion title="Application Security">
+    - **Configure CORS** policies appropriately  
+    - **Set up rate limiting** on API Gateway
+    - **Enable request logging** for debugging
+    - **Use JWT tokens** with appropriate expiration
+    - **Implement input validation** on all endpoints
+  </Accordion>
+</AccordionGroup>
+
+### Monitoring and Observability
+
+<Steps>
+  <Step title="CloudWatch Setup">
+    Configure comprehensive logging and monitoring:
+    
+    <CodeGroup>
+    ```yaml CloudWatch Configuration
+    # Add to SAM template.yaml
+    Globals:
+      Function:
+        Environment:
+          Variables:
+            LOG_LEVEL: INFO
+        Tracing: Active
+        
+    # Enable X-Ray tracing
+    Resources:
+      MyFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+          Tracing: Active
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Custom Metrics">
+    Set up business metrics tracking:
+    - Message volume and delivery rates
+    - User engagement and active sessions
+    - Webhook delivery success rates
+    - AI agent usage and response times
+  </Step>
+  
+  <Step title="Alerting">
+    Configure alerts for critical issues:
+    - High error rates or function failures
+    - Database connection issues
+    - Unusual traffic patterns
+    - Security-related events
+  </Step>
+</Steps>
+
+## Maintenance and Updates
+
+### Update Process
+
+<Steps>
+  <Step title="Staging Deployment">
+    Always test updates in a staging environment first
+  </Step>
+  
+  <Step title="Database Migrations">
+    Run database schema updates before deploying new application versions
+  </Step>
+  
+  <Step title="Rolling Updates">
+    Deploy backend functions with gradual traffic shifting
+  </Step>
+  
+  <Step title="Monitoring">
+    Monitor application health and performance after updates
+  </Step>
+</Steps>
+
+### Backup and Recovery
+
+<Tabs>
+  <Tab title="Database Backups">
+    - **Automated backups** via Supabase (daily snapshots)
+    - **Point-in-time recovery** for critical data
+    - **Cross-region replication** for disaster recovery
+    - **Regular backup testing** and restoration procedures
+  </Tab>
+  
+  <Tab title="Application Backups">
+    - **Infrastructure as Code** (CloudFormation templates)
+    - **Configuration backups** (environment variables, secrets)
+    - **Code repository** management and branching strategy
+    - **Deployment pipeline** backup and recovery
+  </Tab>
+</Tabs>
+
+---
+
+<CardGroup cols={2}>
+  <Card title="Development Guide" icon="code" href="/development/setup">
+    Detailed development environment setup
+  </Card>
+  
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Get started with hosted Pager in minutes
+  </Card>
+</CardGroup>

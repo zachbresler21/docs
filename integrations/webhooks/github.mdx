@@ -1,0 +1,395 @@
+---
+title: "GitHub Integration"
+description: "Connect your GitHub repositories to get real-time development notifications"
+---
+
+The GitHub webhook integration brings your development workflow directly into Pager, providing real-time notifications for commits, pull requests, issues, releases, and more. Keep your team informed about repository activity without leaving your communication platform.
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Repository Events" icon="git-branch">
+    **Push Events**: New commits and branch updates
+    **Branch Management**: Branch creation and deletion
+    **Tag Events**: New tags and releases
+  </Card>
+  
+  <Card title="Pull Requests" icon="git-pull-request">
+    **PR Activity**: Creation, updates, and merges
+    **Code Reviews**: Review requests and approvals
+    **Status Checks**: CI/CD build results
+  </Card>
+  
+  <Card title="Issue Tracking" icon="bug">
+    **Issue Management**: New issues and updates
+    **Labels & Assignees**: Tracking and assignments
+    **Comments**: Discussion notifications
+  </Card>
+  
+  <Card title="Security & Quality" icon="shield-check">
+    **Security Alerts**: Vulnerability notifications
+    **Code Scanning**: Security findings
+    **Dependency Updates**: Dependabot alerts
+  </Card>
+</CardGroup>
+
+## Setup Guide
+
+### Step 1: Create GitHub Webhook in Pager
+
+<Steps>
+  <Step title="Navigate to Webhooks">
+    In your Pager workspace, go to **Settings** → **Webhooks**
+  </Step>
+  
+  <Step title="Create New Webhook">
+    Click **"Create Webhook"** and select **"GitHub"** as the service type
+  </Step>
+  
+  <Step title="Configure Webhook">
+    - **Name**: Enter a descriptive name (e.g., "Backend Repo Updates")
+    - **Target Channel**: Select the channel for GitHub notifications
+    - **Signing Secret**: Enter your GitHub webhook secret (recommended)
+  </Step>
+  
+  <Step title="Copy Webhook URL">
+    Copy the generated webhook URL - you'll need this for GitHub configuration
+  </Step>
+</Steps>
+
+<Note>
+  The signing secret helps verify that webhook requests are coming from GitHub. While optional, it's highly recommended for security.
+</Note>
+
+### Step 2: Configure GitHub Repository
+
+<Steps>
+  <Step title="Open Repository Settings">
+    Navigate to your GitHub repository and click **Settings** → **Webhooks**
+  </Step>
+  
+  <Step title="Add Webhook">
+    Click **"Add webhook"** to create a new webhook configuration
+  </Step>
+  
+  <Step title="Configure Webhook Settings">
+    Fill in the webhook configuration:
+    
+    <Tabs>
+      <Tab title="Basic Settings">
+        - **Payload URL**: Paste your Pager webhook URL
+        - **Content type**: Select `application/json`
+        - **Secret**: Enter the same signing secret used in Pager
+      </Tab>
+      
+      <Tab title="Event Selection">
+        Choose which events to send:
+        - **Just the push event**: For commit notifications only
+        - **Send me everything**: For all repository events
+        - **Let me select individual events**: For custom event selection
+      </Tab>
+      
+      <Tab title="Recommended Events">
+        For optimal Pager integration, select:
+        - ✅ **Push** - Commits and branch updates
+        - ✅ **Pull requests** - PR activity and reviews
+        - ✅ **Issues** - Issue creation and updates
+        - ✅ **Issue comments** - Discussion notifications
+        - ✅ **Pull request reviews** - Code review activity
+        - ✅ **Release** - New releases and tags
+        - ✅ **Workflow runs** - CI/CD status updates
+      </Tab>
+    </Tabs>
+  </Step>
+  
+  <Step title="Activate Webhook">
+    Ensure **"Active"** is checked and click **"Add webhook"**
+  </Step>
+</Steps>
+
+### Step 3: Test Your Integration
+
+<Steps>
+  <Step title="Trigger a Test Event">
+    Make a commit, create an issue, or open a pull request in your repository
+  </Step>
+  
+  <Step title="Verify in Pager">
+    Check your designated channel for the formatted notification message
+  </Step>
+  
+  <Step title="Check Webhook Status">
+    In GitHub's webhook settings, verify the webhook shows a green checkmark for recent deliveries
+  </Step>
+</Steps>
+
+## Message Examples
+
+Here's what GitHub notifications look like in Pager:
+
+### Push Event
+<Frame>
+```markdown
+🔀 **New commits pushed to main**
+Repository: **myorg/backend-api**
+
+**3 commits** by @johndoe:
+• feat: add user authentication endpoint
+• fix: resolve database connection issues  
+• docs: update API documentation
+
+[View Changes](https://github.com/myorg/backend-api/compare/abc123...def456)
+```
+</Frame>
+
+### Pull Request
+<Frame>
+```markdown
+🔍 **Pull request opened**
+Repository: **myorg/frontend-app**
+
+**#42: Implement dark mode toggle**
+by @sarahdev → **main**
+
+Add dark mode support with user preference persistence and system theme detection.
+
+**Changes**: +127 -43 across 8 files
+**Reviewers**: @teamlead, @designer
+
+[Review PR](https://github.com/myorg/frontend-app/pull/42) | [View Files](https://github.com/myorg/frontend-app/pull/42/files)
+```
+</Frame>
+
+### Issue Created
+<Frame>
+```markdown
+🐛 **New issue opened**
+Repository: **myorg/mobile-app**
+
+**#18: App crashes on login with special characters**
+by @userreporter
+
+When users enter special characters in their password, the app crashes on iOS devices. This affects users with complex passwords.
+
+**Labels**: bug, ios, high-priority
+**Assignee**: @mobildev
+
+[View Issue](https://github.com/myorg/mobile-app/issues/18)
+```
+</Frame>
+
+## Advanced Configuration
+
+### Custom Event Filtering
+
+For teams that want more control over notifications:
+
+<CodeGroup>
+```json GitHub Webhook Configuration
+{
+  "events": [
+    "push",
+    "pull_request", 
+    "issues",
+    "pull_request_review",
+    "release",
+    "workflow_run"
+  ],
+  "active": true,
+  "config": {
+    "url": "https://api.pager.team/webhooks/your-webhook-id",
+    "content_type": "json",
+    "secret": "your-signing-secret",
+    "insecure_ssl": "0"
+  }
+}
+```
+</CodeGroup>
+
+### Branch-Specific Notifications
+
+To get notifications only for specific branches:
+
+<Note>
+  GitHub doesn't support branch filtering at the webhook level, but you can create separate webhooks for different repositories or use GitHub Actions to filter and forward events.
+</Note>
+
+### Organization-Level Webhooks
+
+For organizations managing multiple repositories:
+
+<Steps>
+  <Step title="Organization Settings">
+    Go to your GitHub organization settings → **Webhooks**
+  </Step>
+  
+  <Step title="Create Organization Webhook">
+    Add a webhook that will receive events from all organization repositories
+  </Step>
+  
+  <Step title="Configure Event Scope">
+    Select events and repositories that should trigger notifications
+  </Step>
+</Steps>
+
+## Supported Events
+
+Pager processes these GitHub webhook events:
+
+<AccordionGroup>
+  <Accordion title="Repository Events">
+    - **push** - Commits pushed to any branch
+    - **create** - Branch or tag creation
+    - **delete** - Branch or tag deletion
+    - **fork** - Repository forked
+    - **watch** - Repository starred
+  </Accordion>
+  
+  <Accordion title="Pull Request Events">
+    - **pull_request** - PR opened, closed, merged, synchronized
+    - **pull_request_review** - Reviews submitted, edited, dismissed
+    - **pull_request_review_comment** - Comments on PR reviews
+  </Accordion>
+  
+  <Accordion title="Issue Events">
+    - **issues** - Issue opened, closed, edited, assigned
+    - **issue_comment** - Comments on issues
+    - **label** - Labels added or removed
+  </Accordion>
+  
+  <Accordion title="Release & Deployment">
+    - **release** - Release published, edited, deleted
+    - **deployment** - Deployment created
+    - **deployment_status** - Deployment status changed
+  </Accordion>
+  
+  <Accordion title="Workflow & Actions">
+    - **workflow_run** - GitHub Actions workflow completed
+    - **workflow_dispatch** - Manual workflow triggered
+    - **check_run** - Check run completed
+    - **check_suite** - Check suite completed
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+### Common Issues
+
+<AccordionGroup>
+  <Accordion title="Webhook not receiving events">
+    **Check these settings:**
+    - Verify the webhook URL is correct in GitHub
+    - Ensure the webhook is marked as "Active" in GitHub
+    - Check that events are selected in GitHub webhook settings
+    - Verify network connectivity and firewall settings
+    
+    **Debug steps:**
+    - Review recent deliveries in GitHub webhook settings
+    - Check webhook logs in Pager dashboard
+    - Test with a simple push event
+  </Accordion>
+  
+  <Accordion title="Signature verification failing">
+    **Common causes:**
+    - Signing secret mismatch between GitHub and Pager
+    - Webhook payload modified by proxy or firewall
+    - Incorrect HMAC-SHA256 signature calculation
+    
+    **Solutions:**
+    - Regenerate and update the signing secret in both systems
+    - Verify no middleware is modifying the payload
+    - Check GitHub's webhook delivery logs for signature details
+  </Accordion>
+  
+  <Accordion title="Messages not appearing in channel">
+    **Check these items:**
+    - Verify the target channel exists and is accessible
+    - Ensure the webhook user has permission to post in the channel
+    - Check if messages are being filtered or blocked
+    - Review channel notification settings
+  </Accordion>
+  
+  <Accordion title="Too many notifications">
+    **Optimization strategies:**
+    - Reduce selected events to only essential ones
+    - Use branch protection rules to limit push notifications
+    - Create separate channels for different types of notifications
+    - Consider organization-level webhooks for better filtering
+  </Accordion>
+</AccordionGroup>
+
+### Testing Webhook Delivery
+
+To test your GitHub webhook:
+
+<Steps>
+  <Step title="Use GitHub's Test Feature">
+    In your GitHub webhook settings, click "Recent Deliveries" then "Redeliver" for any previous delivery
+  </Step>
+  
+  <Step title="Trigger Real Events">
+    - Make a commit to trigger push events
+    - Create or comment on an issue
+    - Open a pull request
+  </Step>
+  
+  <Step title="Monitor Pager Logs">
+    Check the webhook logs in your Pager dashboard for delivery confirmation
+  </Step>
+</Steps>
+
+## Best Practices
+
+### Repository Organization
+- **Create dedicated channels** for different repositories or teams
+- **Use consistent naming** for repository-specific channels (e.g., #repo-backend-api)
+- **Separate high-traffic repos** to avoid notification overload
+
+### Event Selection
+- **Start minimal** with just push and pull request events
+- **Add events gradually** based on team needs
+- **Avoid workflow_run events** for repositories with frequent CI/CD runs
+
+### Security
+- **Always use signing secrets** in production environments
+- **Rotate secrets regularly** as part of security maintenance
+- **Monitor webhook activity** for unusual patterns
+- **Use repository-specific secrets** for better security isolation
+
+## Multiple Repository Setup
+
+For teams managing multiple repositories:
+
+<Tabs>
+  <Tab title="Individual Webhooks">
+    **Pros**: Granular control, dedicated channels
+    **Cons**: More management overhead
+    
+    Create separate Pager webhooks for each repository with repository-specific channels.
+  </Tab>
+  
+  <Tab title="Organization Webhook">
+    **Pros**: Centralized management, single configuration
+    **Cons**: All repos in one channel (unless filtered)
+    
+    Use GitHub organization webhooks to capture all repository events.
+  </Tab>
+  
+  <Tab title="Hybrid Approach">
+    **Best of both**: Important repos get dedicated channels, others share a general channel
+    
+    Combine individual webhooks for key repositories with an organization webhook for others.
+  </Tab>
+</Tabs>
+
+---
+
+<CardGroup cols={2}>
+  <Card title="Next Integration" icon="arrow-right" href="/integrations/webhooks/linear">
+    Set up Linear webhook integration
+  </Card>
+  
+  <Card title="General Setup" icon="cog" href="/integrations/webhooks/setup">
+    Learn general webhook configuration
+  </Card>
+</CardGroup>

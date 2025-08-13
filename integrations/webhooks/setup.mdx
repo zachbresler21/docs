@@ -1,0 +1,424 @@
+---
+title: "Webhook Setup Guide"
+description: "Complete guide to configuring webhooks in Pager"
+---
+
+This comprehensive guide walks you through setting up webhooks in Pager, from basic configuration to advanced troubleshooting. Whether you're connecting your first service or managing multiple integrations, this guide has you covered.
+
+## Before You Begin
+
+### Prerequisites
+
+<Steps>
+  <Step title="Admin Access">
+    You need **admin permissions** in your Pager workspace to create and manage webhooks
+  </Step>
+  
+  <Step title="Target Channel">
+    Create or identify the channel where webhook notifications should be posted
+  </Step>
+  
+  <Step title="External Service Access">
+    Ensure you have admin access to the external service you want to integrate
+  </Step>
+</Steps>
+
+### Understanding Webhook Limits
+
+<Note>
+  Each workspace has limits to ensure optimal performance:
+  - **5 webhooks per service type** (GitHub, Linear, Jira, Stripe, Custom)
+  - **25 total webhooks per workspace**
+  - **1000 requests per hour per webhook**
+  - **1MB maximum payload size**
+</Note>
+
+## Step-by-Step Setup Process
+
+### Step 1: Navigate to Webhook Settings
+
+<Steps>
+  <Step title="Access Settings">
+    In your Pager workspace, click on your workspace name in the top-left corner
+  </Step>
+  
+  <Step title="Open Webhook Management">
+    Select **"Settings"** from the dropdown menu, then click **"Webhooks"** in the sidebar
+  </Step>
+  
+  <Step title="Review Current Webhooks">
+    You'll see a list of existing webhooks with their status, activity, and configuration details
+  </Step>
+</Steps>
+
+### Step 2: Create New Webhook
+
+<Steps>
+  <Step title="Start Creation">
+    Click the **"Create Webhook"** button in the top-right corner
+  </Step>
+  
+  <Step title="Select Service Type">
+    Choose from available integrations:
+    
+    <Tabs>
+      <Tab title="Supported Services">
+        - **GitHub**: Repository events and development notifications
+        - **Linear**: Issue tracking and project management updates  
+        - **Jira**: Project management and issue tracking
+        - **Stripe**: Payment events and subscription management
+        - **Custom**: General-purpose webhooks for any service
+      </Tab>
+      
+      <Tab title="Selection Tips">
+        - **Choose specific services** for better formatting and features
+        - **Use Custom** for services not explicitly supported
+        - **Consider future needs** when selecting service types
+        - **Check limits** if approaching the 5-webhook limit per service
+      </Tab>
+    </Tabs>
+  </Step>
+  
+  <Step title="Configure Basic Settings">
+    Fill in the webhook configuration:
+    
+    - **Webhook Name**: Descriptive name (e.g., "Backend Repo Updates", "Payment Alerts")
+    - **Target Channel**: Select the channel for notifications
+    - **Description**: Optional details about the webhook's purpose
+  </Step>
+</Steps>
+
+### Step 3: Configure Security (Signing Secret)
+
+<Warning>
+  **Security Best Practice**: Always use signing secrets for production webhooks to verify that requests come from the legitimate service.
+</Warning>
+
+<Tabs>
+  <Tab title="With Signing Secret (Recommended)">
+    <Steps>
+      <Step title="Enable Signing Secret">
+        Check the **"Use Signing Secret"** option during webhook creation
+      </Step>
+      
+      <Step title="Enter Secret">
+        - **For most services**: Enter the signing secret from your external service
+        - **For Stripe**: Leave empty initially, add after configuring Stripe
+      </Step>
+      
+      <Step title="Save Configuration">
+        The signing secret will be used to verify webhook authenticity
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Without Signing Secret">
+    <Warning>
+      Only recommended for development/testing environments
+    </Warning>
+    
+    <Steps>
+      <Step title="Skip Secret">
+        Leave the signing secret field empty
+      </Step>
+      
+      <Step title="Understand Risks">
+        Webhooks without signing secrets cannot verify sender authenticity
+      </Step>
+      
+      <Step title="Monitor Activity">
+        Regularly check webhook logs for suspicious activity
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+### Step 4: Copy Webhook URL
+
+<Steps>
+  <Step title="Generate URL">
+    After creating the webhook, Pager generates a unique URL for your integration
+  </Step>
+  
+  <Step title="Copy URL">
+    Click the **"Copy URL"** button or copy the full webhook URL from the details page
+  </Step>
+  
+  <Step title="Secure Storage">
+    Store the webhook URL securely - it's the endpoint your external service will use
+  </Step>
+</Steps>
+
+<Note>
+  Webhook URLs are unique and cannot be changed after creation. If you need a different URL, you'll need to create a new webhook.
+</Note>
+
+### Step 5: Configure External Service
+
+The configuration process varies by service. Here are general steps:
+
+<Steps>
+  <Step title="Access Service Settings">
+    Log into your external service and navigate to webhook/integration settings
+  </Step>
+  
+  <Step title="Add Webhook Endpoint">
+    Create a new webhook endpoint using your Pager webhook URL
+  </Step>
+  
+  <Step title="Configure Events">
+    Select which events should trigger notifications to Pager
+  </Step>
+  
+  <Step title="Set Signing Secret">
+    If using a signing secret, configure it in your external service
+  </Step>
+  
+  <Step title="Test Configuration">
+    Most services offer a "test webhook" feature to verify the connection
+  </Step>
+</Steps>
+
+### Step 6: Verify Integration
+
+<Steps>
+  <Step title="Trigger Test Event">
+    Create a test event in your external service (e.g., commit, issue, payment)
+  </Step>
+  
+  <Step title="Check Pager Channel">
+    Verify that the formatted notification appears in your designated channel
+  </Step>
+  
+  <Step title="Review Webhook Logs">
+    In Pager webhook settings, check the activity logs for successful delivery
+  </Step>
+  
+  <Step title="Validate Formatting">
+    Ensure the message format meets your team's needs
+  </Step>
+</Steps>
+
+## Advanced Configuration
+
+### Channel Routing Strategies
+
+<Tabs>
+  <Tab title="Service-Based Channels">
+    **Best for**: Teams with multiple integrations
+    
+    - `#github-notifications` - All GitHub events
+    - `#stripe-payments` - All payment events  
+    - `#linear-updates` - Project management updates
+    - `#integrations-alerts` - Critical webhook failures
+  </Tab>
+  
+  <Tab title="Priority-Based Channels">
+    **Best for**: Teams focused on urgency
+    
+    - `#critical-alerts` - Payment failures, security issues
+    - `#team-updates` - General project and development updates
+    - `#business-metrics` - Revenue, subscriptions, analytics
+    - `#dev-activity` - Commits, PRs, deployments
+  </Tab>
+  
+  <Tab title="Project-Based Channels">
+    **Best for**: Project-focused teams
+    
+    - `#project-alpha-dev` - Development notifications for Project Alpha
+    - `#project-beta-business` - Business metrics for Project Beta
+    - `#infrastructure-alerts` - System and deployment notifications
+  </Tab>
+</Tabs>
+
+### Multiple Environment Management
+
+For teams using multiple environments (development, staging, production):
+
+<Steps>
+  <Step title="Create Environment-Specific Webhooks">
+    Set up separate Pager webhooks for each environment
+  </Step>
+  
+  <Step title="Use Clear Naming">
+    - `GitHub Prod - Backend API`
+    - `GitHub Dev - Backend API`  
+    - `Stripe Production Payments`
+    - `Stripe Test Payments`
+  </Step>
+  
+  <Step title="Route to Appropriate Channels">
+    - Production events → High-visibility channels
+    - Development events → Developer-focused channels
+    - Test events → Development or testing channels
+  </Step>
+</Steps>
+
+### Webhook Security Best Practices
+
+<AccordionGroup>
+  <Accordion title="Signing Secret Management">
+    - **Generate strong secrets** using your external service's recommended method
+    - **Store secrets securely** and avoid sharing them in plain text
+    - **Rotate secrets regularly** as part of security maintenance
+    - **Use different secrets** for different environments
+    - **Monitor failed verification attempts** for potential security issues
+  </Accordion>
+  
+  <Accordion title="Access Control">
+    - **Limit webhook creation** to administrators only
+    - **Review webhook activity** regularly for suspicious patterns
+    - **Use dedicated channels** for sensitive webhook notifications
+    - **Monitor webhook URLs** and regenerate if compromised
+    - **Implement logging** for webhook-related activities
+  </Accordion>
+  
+  <Accordion title="Network Security">
+    - **Use HTTPS endpoints** (Pager enforces this automatically)
+    - **Configure firewalls** to allow traffic from webhook sources
+    - **Monitor webhook traffic** for unusual volume or patterns
+    - **Implement rate limiting** if experiencing abuse
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting Common Issues
+
+### Webhook Creation Problems
+
+<AccordionGroup>
+  <Accordion title="Cannot create webhook - limit reached">
+    **Problem**: "You've reached the maximum number of webhooks for this service type"
+    
+    **Solution**:
+    - Review existing webhooks and delete unused ones
+    - Combine multiple webhooks if possible
+    - Contact support for enterprise limits
+    - Consider using custom webhooks for additional integrations
+  </Accordion>
+  
+  <Accordion title="Channel selection issues">
+    **Problem**: Target channel not appearing in dropdown
+    
+    **Solution**:
+    - Ensure you have admin permissions in the channel
+    - Verify the channel exists and you're a member
+    - Check channel privacy settings
+    - Try refreshing the page and creating the webhook again
+  </Accordion>
+  
+  <Accordion title="Service type not available">
+    **Problem**: Desired service not in the dropdown
+    
+    **Solution**:
+    - Use "Custom" webhook type for unsupported services
+    - Check if the service has webhook capabilities
+    - Request new service integrations via support
+    - Consider using Zapier or similar tools for complex integrations
+  </Accordion>
+</AccordionGroup>
+
+### Webhook Delivery Issues
+
+<AccordionGroup>
+  <Accordion title="No notifications received">
+    **Diagnostic Steps**:
+    1. Check external service webhook settings and test delivery
+    2. Verify webhook URL is correct in external service  
+    3. Review Pager webhook logs for incoming requests
+    4. Confirm target channel exists and is accessible
+    5. Check webhook status in Pager dashboard
+    
+    **Common Solutions**:
+    - Regenerate webhook URL if potentially compromised
+    - Verify network connectivity and firewall rules
+    - Check for webhook payload size limits
+    - Review external service webhook event selection
+  </Accordion>
+  
+  <Accordion title="Signature verification failures">
+    **Diagnostic Steps**:
+    1. Verify signing secret matches between services
+    2. Check webhook logs for specific error messages
+    3. Test with a fresh signing secret
+    4. Confirm payload isn't modified by middleware
+    
+    **Common Solutions**:
+    - Copy signing secret exactly from external service
+    - Regenerate signing secret in both systems
+    - Check for URL encoding or character issues
+    - Verify webhook payload format requirements
+  </Accordion>
+  
+  <Accordion title="Partial or malformed notifications">
+    **Diagnostic Steps**:
+    1. Review webhook payload in external service logs
+    2. Check Pager processing logs for errors
+    3. Test with different event types
+    4. Verify payload matches expected format
+    
+    **Common Solutions**:
+    - Update external service webhook configuration
+    - Check for API version compatibility
+    - Review event type selection in external service
+    - Contact support if payload processing seems incorrect
+  </Accordion>
+</AccordionGroup>
+
+## Monitoring and Maintenance
+
+### Regular Maintenance Tasks
+
+<Steps>
+  <Step title="Weekly Review">
+    - Check webhook delivery statistics
+    - Review failed delivery logs
+    - Monitor channel activity and engagement
+    - Update webhook configurations as needed
+  </Step>
+  
+  <Step title="Monthly Security Check">
+    - Review webhook access logs
+    - Rotate signing secrets if required by policy
+    - Audit webhook permissions and channel access
+    - Check for unused or inactive webhooks
+  </Step>
+  
+  <Step title="Quarterly Assessment">
+    - Evaluate webhook effectiveness and team usage
+    - Consider consolidating or reorganizing webhooks
+    - Review channel organization and routing
+    - Plan for new integrations or service additions
+  </Step>
+</Steps>
+
+### Performance Monitoring
+
+<Tabs>
+  <Tab title="Key Metrics">
+    - **Delivery Success Rate**: Percentage of successful webhook deliveries
+    - **Response Time**: Time between event and notification
+    - **Message Volume**: Number of webhook messages per day/week
+    - **Error Rate**: Frequency of webhook processing errors
+    - **Team Engagement**: Channel activity and response rates
+  </Tab>
+  
+  <Tab title="Alert Thresholds">
+    Consider setting up alerts for:
+    - **Delivery failures** > 5% for any webhook
+    - **Response time** > 30 seconds consistently
+    - **Zero activity** for active webhooks over 24 hours
+    - **High error rates** indicating configuration issues
+  </Tab>
+</Tabs>
+
+---
+
+<CardGroup cols={2}>
+  <Card title="Service-Specific Guides" icon="book" href="/integrations/webhooks/github">
+    Detailed setup guides for specific services
+  </Card>
+  
+  <Card title="API Reference" icon="code" href="/api-reference/webhooks/create">
+    Technical webhook API documentation
+  </Card>
+</CardGroup>

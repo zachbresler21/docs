@@ -1,0 +1,487 @@
+---
+title: "Linear Integration"
+description: "Track project progress and issue updates automatically"
+---
+
+The Linear webhook integration keeps your team updated on issue progress, project milestones, and development workflow changes. Get real-time notifications about issue assignments, status changes, comments, and project updates directly in your Pager channels.
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Issue Tracking" icon="bug">
+    **Issue Updates**: Creation, status changes, and assignments
+    **Priority Changes**: Priority level adjustments and escalations
+    **Labels & Tags**: Label additions and modifications
+    **Estimates**: Story point and time estimate updates
+  </Card>
+  
+  <Card title="Project Management" icon="kanban">
+    **Project Updates**: Project creation, updates, and completions
+    **Milestone Tracking**: Milestone progress and achievement notifications
+    **Cycle Management**: Development cycle start, end, and updates
+    **Team Assignments**: Issue assignments and team changes
+  </Card>
+  
+  <Card title="Collaboration" icon="comments">
+    **Comments**: New comments on issues and discussions
+    **Mentions**: Team member mentions in issues and comments
+    **Status Updates**: Workflow state transitions
+    **Attachments**: File attachments and document updates
+  </Card>
+  
+  <Card title="Workflow Integration" icon="workflow">
+    **State Transitions**: Issue workflow state changes
+    **Custom Fields**: Custom field value updates
+    **Relations**: Issue blocking, dependencies, and relations
+    **Integration Events**: Git branch and PR connections
+  </Card>
+</CardGroup>
+
+## Setup Guide
+
+### Step 1: Create Linear Webhook in Pager
+
+<Steps>
+  <Step title="Navigate to Webhooks">
+    In your Pager workspace, go to **Settings** → **Webhooks**
+  </Step>
+  
+  <Step title="Create New Webhook">
+    Click **"Create Webhook"** and select **"Linear"** as the service type
+  </Step>
+  
+  <Step title="Configure Webhook">
+    - **Name**: Enter a descriptive name (e.g., "Linear Project Updates")
+    - **Target Channel**: Select the channel for Linear notifications
+    - **Signing Secret**: Enter your Linear webhook secret (required for Linear)
+  </Step>
+  
+  <Step title="Copy Webhook URL">
+    Copy the generated webhook URL - you'll need this for Linear configuration
+  </Step>
+</Steps>
+
+### Step 2: Configure Linear Workspace
+
+<Steps>
+  <Step title="Open Linear Settings">
+    In your Linear workspace, navigate to **Settings** → **API** → **Webhooks**
+  </Step>
+  
+  <Step title="Create New Webhook">
+    Click **"Create webhook"** to add a new webhook configuration
+  </Step>
+  
+  <Step title="Configure Webhook Settings">
+    Fill in the webhook configuration:
+    
+    <Tabs>
+      <Tab title="Basic Settings">
+        - **Label**: Give the webhook a descriptive name (e.g., "Pager Team Notifications")
+        - **URL**: Paste your Pager webhook URL
+        - **Enabled**: Ensure the webhook is enabled
+      </Tab>
+      
+      <Tab title="Secret Configuration">
+        - **Secret**: Enter a secure random string (you'll use this in Pager)
+        - **Copy Secret**: Copy this secret to add to your Pager webhook
+      </Tab>
+      
+      <Tab title="Event Selection">
+        Choose which events to send:
+        
+        **Recommended Events:**
+        - ✅ **Issues** - Issue creation, updates, deletion
+        - ✅ **Comments** - New comments on issues
+        - ✅ **Projects** - Project updates and changes
+        - ✅ **Project updates** - Project status and milestone changes
+        - ✅ **Cycles** - Development cycle management
+        
+        **Optional Events:**
+        - **Issue labels** - Label changes (can be noisy)
+        - **Attachments** - File attachments
+        - **Issue relations** - Dependencies and blocking relationships
+      </Tab>
+    </Tabs>
+  </Step>
+  
+  <Step title="Save Configuration">
+    Click **"Create webhook"** to save your configuration
+  </Step>
+</Steps>
+
+### Step 3: Update Pager with Signing Secret
+
+<Steps>
+  <Step title="Return to Pager">
+    Go back to your Pager webhook settings
+  </Step>
+  
+  <Step title="Edit Webhook">
+    Click on your Linear webhook and select **"Edit"**
+  </Step>
+  
+  <Step title="Add Signing Secret">
+    Paste the Linear webhook secret into the **"Signing Secret"** field
+  </Step>
+  
+  <Step title="Save Configuration">
+    Click **"Save"** to complete the setup
+  </Step>
+</Steps>
+
+### Step 4: Test Integration
+
+<Steps>
+  <Step title="Create Test Issue">
+    In Linear, create a new issue or update an existing one
+  </Step>
+  
+  <Step title="Verify Notification">
+    Check your designated Pager channel for the Linear notification
+  </Step>
+  
+  <Step title="Check Delivery Status">
+    In Linear's webhook settings, verify successful delivery in the webhook logs
+  </Step>
+</Steps>
+
+## Message Examples
+
+Here's what Linear notifications look like in Pager:
+
+### Issue Created
+<Frame>
+```markdown
+📝 **New issue created**
+Team: **Engineering** • Project: **Mobile App v2.0**
+
+**ENG-142: Implement push notification settings**
+Priority: **High** • Status: **Todo**
+Assignee: **@sarah-dev**
+
+**Description:**
+Add user preference settings for managing push notification types and frequency. Include options for mentions, project updates, and issue assignments.
+
+**Labels:** mobile, notifications, user-settings
+
+[View Issue](https://linear.app/company/issue/ENG-142) | [Assign to Me](https://linear.app/company/issue/ENG-142)
+```
+</Frame>
+
+### Issue Status Change
+<Frame>
+```markdown
+🔄 **Issue status updated**
+Team: **Engineering** • Project: **Backend API**
+
+**ENG-138: Database migration optimization**
+**Todo** → **In Progress**
+Assignee: **@john-backend**
+
+**Updated by:** @tech-lead
+**Cycle:** Sprint 24 (3 days remaining)
+
+[View Issue](https://linear.app/company/issue/ENG-138) | [View Project](https://linear.app/company/project/backend-api)
+```
+</Frame>
+
+### New Comment
+<Frame>
+```markdown
+💬 **New comment on issue**
+Team: **Engineering** • Project: **Frontend Redesign**
+
+**ENG-135: Update component library** • **In Review**
+Comment by: **@designer**
+
+"I've reviewed the component updates and they look great! One small suggestion: can we increase the border radius on the buttons to match our new design system? The current 4px feels a bit sharp."
+
+**Previous comments:** 3
+[View Issue](https://linear.app/company/issue/ENG-135) | [Reply](https://linear.app/company/issue/ENG-135#comments)
+```
+</Frame>
+
+### Project Milestone
+<Frame>
+```markdown
+🎯 **Project milestone completed**
+Project: **Mobile App v2.0** • Team: **Engineering**
+
+**Milestone:** Authentication & User Management
+**Completed:** 8/8 issues • **Progress:** 100%
+
+**Key Achievements:**
+• OAuth integration with Google and Apple
+• Biometric authentication support  
+• User profile management system
+• Password reset functionality
+
+**Next Milestone:** Push Notifications (6 issues remaining)
+[View Project](https://linear.app/company/project/mobile-app-v2) | [View Roadmap](https://linear.app/company/roadmap)
+```
+</Frame>
+
+## Advanced Configuration
+
+### Team-Specific Webhooks
+
+For organizations with multiple Linear teams:
+
+<Steps>
+  <Step title="Create Team-Specific Webhooks">
+    Set up separate Pager webhooks for different Linear teams
+  </Step>
+  
+  <Step title="Configure Team Filters">
+    In Linear webhook settings, you can filter events by team:
+    
+    <CodeGroup>
+    ```json Linear Webhook Filter
+    {
+      "url": "https://api.pager.team/webhooks/your-webhook-id",
+      "enabled": true,
+      "teamIds": ["team-engineering", "team-design"],
+      "resourceTypes": ["Issue", "Comment", "Project"]
+    }
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Channel Organization">
+    Route different teams to different channels:
+    - `#linear-engineering` - Engineering team updates
+    - `#linear-design` - Design team updates  
+    - `#linear-product` - Product team updates
+  </Step>
+</Steps>
+
+### Project-Based Routing
+
+For project-focused notifications:
+
+<Tabs>
+  <Tab title="Multiple Webhooks">
+    **Best for**: Different channels per project
+    
+    Create separate webhooks for major projects and route to dedicated channels
+  </Tab>
+  
+  <Tab title="Single Webhook with Filtering">
+    **Best for**: Centralized management
+    
+    Use one webhook and organize notifications within a single channel using Linear's project context
+  </Tab>
+</Tabs>
+
+### Priority-Based Notifications
+
+Configure different notification levels:
+
+<CodeGroup>
+```json High Priority Filter
+{
+  "resourceTypes": ["Issue", "Comment"],
+  "action": ["create", "update"],
+  "data": {
+    "priority": {
+      "$gte": 2
+    }
+  }
+}
+```
+</CodeGroup>
+
+## Supported Events
+
+Pager processes these Linear webhook events:
+
+<AccordionGroup>
+  <Accordion title="Issue Events">
+    - **Issue.create** - New issue created
+    - **Issue.update** - Issue details updated (title, description, priority, etc.)
+    - **Issue.remove** - Issue deleted
+    - **IssueLabel.create** - Label added to issue
+    - **IssueLabel.remove** - Label removed from issue
+  </Accordion>
+  
+  <Accordion title="Comment Events">
+    - **Comment.create** - New comment on issue
+    - **Comment.update** - Comment edited
+    - **Comment.remove** - Comment deleted
+  </Accordion>
+  
+  <Accordion title="Project Events">
+    - **Project.create** - New project created
+    - **Project.update** - Project details updated
+    - **Project.remove** - Project deleted
+    - **ProjectUpdate.create** - Project status update posted
+    - **ProjectUpdate.update** - Project update edited
+  </Accordion>
+  
+  <Accordion title="Workflow Events">
+    - **WorkflowState.create** - New workflow state added
+    - **WorkflowState.update** - Workflow state modified
+    - **Cycle.create** - New development cycle started
+    - **Cycle.update** - Cycle details updated
+  </Accordion>
+  
+  <Accordion title="Team & User Events">
+    - **Team.create** - New team created
+    - **Team.update** - Team details updated
+    - **TeamMembership.create** - User added to team
+    - **TeamMembership.remove** - User removed from team
+  </Accordion>
+</AccordionGroup>
+
+## Filtering and Customization
+
+### Event Filtering
+
+Linear provides powerful filtering options:
+
+<CodeGroup>
+```json Custom Event Filter
+{
+  "url": "https://api.pager.team/webhooks/your-webhook-id",
+  "enabled": true,
+  "resourceTypes": ["Issue", "Comment"],
+  "teamIds": ["team-123", "team-456"],
+  "projectIds": ["project-abc", "project-xyz"],
+  "data": {
+    "priority": {
+      "$gte": 1
+    },
+    "state": {
+      "type": {
+        "$in": ["started", "completed"]
+      }
+    }
+  }
+}
+```
+</CodeGroup>
+
+### Label-Based Routing
+
+Route issues with specific labels to different channels:
+
+<Steps>
+  <Step title="Create Label-Specific Webhooks">
+    Set up different Pager webhooks for different label categories
+  </Step>
+  
+  <Step title="Configure Linear Filters">
+    Use Linear's data filtering to send only issues with specific labels
+  </Step>
+  
+  <Step title="Example Routing">
+    - **bug** label → `#bugs-and-issues`
+    - **feature** label → `#feature-development`  
+    - **urgent** label → `#critical-alerts`
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+### Common Issues
+
+<AccordionGroup>
+  <Accordion title="Webhook not receiving events">
+    **Check these settings:**
+    - Verify webhook URL is correct in Linear settings
+    - Ensure webhook is enabled in Linear
+    - Check that relevant events are selected in Linear webhook configuration
+    - Verify signing secret matches between Linear and Pager
+    
+    **Debug steps:**
+    - Test webhook using Linear's webhook test feature
+    - Check Linear's webhook delivery logs
+    - Review Pager webhook logs for incoming requests
+  </Accordion>
+  
+  <Accordion title="Signature verification failing">
+    **Common causes:**
+    - Signing secret mismatch between Linear and Pager
+    - Special characters in signing secret not properly handled
+    - Webhook payload modified by proxy or middleware
+    
+    **Solutions:**
+    - Regenerate signing secret in Linear and update in Pager
+    - Ensure signing secret is copied exactly without extra spaces
+    - Check for URL encoding issues in the secret
+  </Accordion>
+  
+  <Accordion title="Too many notifications">
+    **Optimization strategies:**
+    - Use Linear's event filtering to reduce noise
+    - Filter by priority levels (only high/urgent issues)
+    - Exclude label change events if they create too much activity
+    - Create separate channels for different notification types
+    - Use team-specific filters to reduce cross-team noise
+  </Accordion>
+  
+  <Accordion title="Missing issue context">
+    **Possible causes:**
+    - Linear webhook payload doesn't include full issue context
+    - Custom fields not included in webhook data
+    - Project information not properly linked
+    
+    **Solutions:**
+    - Check Linear webhook payload in delivery logs
+    - Ensure all relevant data is included in Linear's webhook configuration
+    - Contact support if specific fields are missing from notifications
+  </Accordion>
+</AccordionGroup>
+
+### Testing Webhook Delivery
+
+<Steps>
+  <Step title="Use Linear's Test Feature">
+    In Linear webhook settings, use the "Send test webhook" button to verify connectivity
+  </Step>
+  
+  <Step title="Trigger Real Events">
+    - Create a test issue in Linear
+    - Update an existing issue's status
+    - Add a comment to an issue
+  </Step>
+  
+  <Step title="Monitor Delivery Logs">
+    - Check Linear's webhook delivery logs for success/failure status
+    - Review Pager webhook logs for processing confirmation
+    - Verify message formatting in the target channel
+  </Step>
+</Steps>
+
+## Best Practices
+
+### Workflow Organization
+- **Separate channels** for different issue types (bugs vs features)
+- **Priority-based filtering** to highlight urgent issues
+- **Team-specific webhooks** for better organization
+- **Consistent naming** for Linear-related channels
+
+### Notification Management
+- **Filter by priority** to reduce notification overload
+- **Exclude low-impact events** like label changes for non-critical issues
+- **Use Linear's built-in filters** rather than managing filtering in Pager
+- **Regular review** of notification volume and team feedback
+
+### Team Collaboration
+- **Include relevant team members** in Linear notification channels
+- **Use Linear issue URLs** for quick access to full context
+- **Establish response workflows** for different issue priorities
+- **Regular cleanup** of completed issues and outdated notifications
+
+---
+
+<CardGroup cols={2}>
+  <Card title="GitHub Integration" icon="github" href="/integrations/webhooks/github">
+    Set up GitHub webhook integration
+  </Card>
+  
+  <Card title="Custom Webhooks" icon="webhook" href="/integrations/webhooks/custom">
+    Learn about custom webhook configurations
+  </Card>
+</CardGroup>

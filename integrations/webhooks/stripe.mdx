@@ -1,0 +1,480 @@
+---
+title: "Stripe Integration"
+description: "Monitor payment events and subscription changes in real-time"
+---
+
+The Stripe webhook integration keeps your team informed about critical payment events, subscription changes, and customer activities. Get instant notifications about successful payments, failed charges, subscription upgrades, and more directly in your Pager channels.
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Payment Events" icon="credit-card">
+    **Successful Payments**: Payment confirmations and receipts
+    **Failed Charges**: Payment failures and retry notifications
+    **Refunds**: Refund processing and confirmations
+    **Disputes**: Chargeback and dispute alerts
+  </Card>
+  
+  <Card title="Subscription Management" icon="refresh">
+    **New Subscriptions**: Customer sign-ups and activations
+    **Plan Changes**: Upgrades, downgrades, and modifications
+    **Cancellations**: Subscription cancellations and pauses
+    **Renewals**: Automatic renewal notifications
+  </Card>
+  
+  <Card title="Customer Activity" icon="users">
+    **New Customers**: Customer registration events
+    **Profile Updates**: Customer information changes
+    **Payment Methods**: Card updates and additions
+    **Account Changes**: Important account modifications
+  </Card>
+  
+  <Card title="Business Intelligence" icon="chart-bar">
+    **Revenue Tracking**: Daily/monthly revenue summaries
+    **Growth Metrics**: Subscription growth indicators
+    **Churn Alerts**: Customer cancellation patterns
+    **Payment Analytics**: Success rates and trends
+  </Card>
+</CardGroup>
+
+## Setup Guide
+
+<Warning>
+  **Important**: Stripe has a unique setup process. You need to create the webhook in Pager first to get the URL, then configure it in Stripe to receive the signing secret.
+</Warning>
+
+### Step 1: Create Stripe Webhook in Pager
+
+<Steps>
+  <Step title="Navigate to Webhooks">
+    In your Pager workspace, go to **Settings** → **Webhooks**
+  </Step>
+  
+  <Step title="Create New Webhook">
+    Click **"Create Webhook"** and select **"Stripe"** as the service type
+  </Step>
+  
+  <Step title="Configure Initial Settings">
+    - **Name**: Enter a descriptive name (e.g., "Payment Notifications")
+    - **Target Channel**: Select the channel for Stripe notifications  
+    - **Signing Secret**: Leave empty for now (we'll add this after Stripe setup)
+  </Step>
+  
+  <Step title="Copy Webhook URL">
+    Copy the generated webhook URL - you'll need this for Stripe configuration
+  </Step>
+</Steps>
+
+<Note>
+  Notice the setup instructions shown in Pager - Stripe requires you to create the webhook endpoint first, then add the URL to Stripe to get your signing secret.
+</Note>
+
+### Step 2: Configure Stripe Dashboard
+
+<Steps>
+  <Step title="Open Stripe Dashboard">
+    Log in to your [Stripe Dashboard](https://dashboard.stripe.com) and navigate to **Developers** → **Webhooks**
+  </Step>
+  
+  <Step title="Add Endpoint">
+    Click **"Add endpoint"** to create a new webhook endpoint
+  </Step>
+  
+  <Step title="Configure Endpoint">
+    - **Endpoint URL**: Paste your Pager webhook URL
+    - **Description**: Enter a description (e.g., "Pager Team Notifications")
+    - **Events to send**: Select events based on your needs (see recommended events below)
+  </Step>
+  
+  <Step title="Select Events">
+    <Tabs>
+      <Tab title="Essential Events">
+        Recommended for most teams:
+        - `payment_intent.succeeded` - Successful payments
+        - `payment_intent.payment_failed` - Failed payments
+        - `invoice.payment_succeeded` - Subscription payments
+        - `invoice.payment_failed` - Failed subscription charges
+        - `customer.subscription.created` - New subscriptions
+        - `customer.subscription.updated` - Plan changes
+        - `customer.subscription.deleted` - Cancellations
+      </Tab>
+      
+      <Tab title="Advanced Events">
+        For detailed monitoring:
+        - `charge.dispute.created` - Chargebacks
+        - `customer.created` - New customers
+        - `payment_method.attached` - Payment methods
+        - `invoice.upcoming` - Upcoming renewals
+        - `subscription_schedule.updated` - Scheduled changes
+      </Tab>
+      
+      <Tab title="All Events">
+        Select **"Send all event types"** to receive comprehensive notifications (higher volume)
+      </Tab>
+    </Tabs>
+  </Step>
+  
+  <Step title="Create Endpoint">
+    Click **"Add endpoint"** to save your webhook configuration
+  </Step>
+</Steps>
+
+### Step 3: Get Signing Secret
+
+<Steps>
+  <Step title="View Endpoint Details">
+    Click on your newly created webhook endpoint in the Stripe Dashboard
+  </Step>
+  
+  <Step title="Reveal Signing Secret">
+    In the endpoint details, find the **"Signing secret"** section and click **"Reveal"**
+  </Step>
+  
+  <Step title="Copy Signing Secret">
+    Copy the signing secret (starts with `whsec_`)
+  </Step>
+</Steps>
+
+### Step 4: Complete Pager Configuration
+
+<Steps>
+  <Step title="Return to Pager">
+    Go back to your Pager webhook settings
+  </Step>
+  
+  <Step title="Edit Webhook">
+    Click on your Stripe webhook and select **"Edit"**
+  </Step>
+  
+  <Step title="Add Signing Secret">
+    Paste the Stripe signing secret into the **"Signing Secret"** field
+  </Step>
+  
+  <Step title="Save Configuration">
+    Click **"Save"** to complete the setup
+  </Step>
+</Steps>
+
+### Step 5: Test Integration
+
+<Steps>
+  <Step title="Send Test Event">
+    In the Stripe Dashboard, go to your webhook endpoint and click **"Send test webhook"**
+  </Step>
+  
+  <Step title="Choose Test Event">
+    Select a test event (e.g., `payment_intent.succeeded`) and send it
+  </Step>
+  
+  <Step title="Verify in Pager">
+    Check your designated Pager channel for the test notification
+  </Step>
+  
+  <Step title="Monitor Status">
+    Verify the webhook shows successful delivery in both Stripe and Pager dashboards
+  </Step>
+</Steps>
+
+## Message Examples
+
+Here's what Stripe notifications look like in Pager:
+
+### Successful Payment
+<Frame>
+```markdown
+💳 **Payment Successful**
+Customer: **John Doe** (john@example.com)
+
+**$49.99 USD** - Monthly Pro Plan
+Payment Method: **** 4242 (Visa)
+Transaction ID: `pi_1234567890`
+
+[View in Stripe](https://dashboard.stripe.com/payments/pi_1234567890)
+```
+</Frame>
+
+### Failed Payment
+<Frame>
+```markdown
+❌ **Payment Failed**
+Customer: **Sarah Smith** (sarah@example.com)
+
+**$99.99 USD** - Annual Premium Plan
+Payment Method: **** 1234 (Visa)
+Reason: **Insufficient funds**
+
+**Action Required**: Customer needs to update payment method
+[View in Stripe](https://dashboard.stripe.com/payments/pi_failed123) | [Send Payment Link](https://dashboard.stripe.com/customers/cus_abc123)
+```
+</Frame>
+
+### New Subscription
+<Frame>
+```markdown
+🎉 **New Subscription Created**
+Customer: **Alex Johnson** (alex@techstartup.com)
+
+**Plan**: Pro Monthly ($29.99/month)
+**Start Date**: January 15, 2024
+**Status**: Active
+
+**Trial**: 14-day free trial until Jan 29, 2024
+[View Customer](https://dashboard.stripe.com/customers/cus_newcustomer)
+```
+</Frame>
+
+### Subscription Cancelled
+<Frame>
+```markdown
+😞 **Subscription Cancelled**
+Customer: **Lisa Chen** (lisa@company.com)
+
+**Plan**: Premium Annual ($299.99/year)
+**Cancellation Date**: February 1, 2024
+**End of Service**: January 31, 2025
+
+**Reason**: Downgrading to free plan
+[View Customer](https://dashboard.stripe.com/customers/cus_cancelled) | [Retention Campaign](https://dashboard.stripe.com/customers/cus_cancelled/retention)
+```
+</Frame>
+
+## Advanced Configuration
+
+### Event Filtering
+
+For high-volume accounts, consider filtering events:
+
+<CodeGroup>
+```json Stripe Webhook Configuration
+{
+  "url": "https://api.pager.team/webhooks/your-webhook-id",
+  "enabled_events": [
+    "payment_intent.succeeded",
+    "payment_intent.payment_failed", 
+    "invoice.payment_succeeded",
+    "invoice.payment_failed",
+    "customer.subscription.created",
+    "customer.subscription.updated",
+    "customer.subscription.deleted",
+    "charge.dispute.created"
+  ],
+  "description": "Pager Team Notifications - Essential Events Only"
+}
+```
+</CodeGroup>
+
+### Multiple Environment Setup
+
+For teams using Stripe in multiple environments:
+
+<Tabs>
+  <Tab title="Separate Webhooks">
+    **Recommended Approach**
+    
+    Create separate Pager webhooks for each Stripe environment:
+    - **Production**: High-priority channel with full team access
+    - **Test**: Development channel for testing and staging
+    - **Development**: Personal or team dev channels
+  </Tab>
+  
+  <Tab title="Channel Organization">
+    **Channel Strategy**
+    
+    - `#payments-prod` - Production payment events
+    - `#payments-test` - Test environment events  
+    - `#payments-alerts` - Critical issues and disputes
+    - `#revenue-tracking` - Business metrics and summaries
+  </Tab>
+</Tabs>
+
+### Custom Message Routing
+
+Route different event types to different channels:
+
+<Steps>
+  <Step title="Create Multiple Webhooks">
+    Set up separate Pager webhooks for different event categories
+  </Step>
+  
+  <Step title="Configure Stripe Endpoints">
+    Create multiple Stripe webhook endpoints with different event selections:
+    - **Critical**: Payment failures, disputes → `#payments-urgent`
+    - **Success**: Successful payments, new subscriptions → `#payments-success`
+    - **Changes**: Plan changes, cancellations → `#customer-updates`
+  </Step>
+  
+  <Step title="Test Routing">
+    Verify events are delivered to the correct channels
+  </Step>
+</Steps>
+
+## Supported Events
+
+Pager processes these Stripe webhook events:
+
+<AccordionGroup>
+  <Accordion title="Payment Events">
+    - `payment_intent.succeeded` - Successful payments
+    - `payment_intent.payment_failed` - Failed payment attempts
+    - `payment_intent.requires_action` - Requires customer action
+    - `charge.succeeded` - Charge completed successfully
+    - `charge.failed` - Charge failed
+    - `charge.refunded` - Refund processed
+    - `charge.dispute.created` - Chargeback initiated
+  </Accordion>
+  
+  <Accordion title="Subscription Events">
+    - `customer.subscription.created` - New subscription
+    - `customer.subscription.updated` - Subscription modified
+    - `customer.subscription.deleted` - Subscription cancelled
+    - `customer.subscription.trial_will_end` - Trial ending soon
+    - `subscription_schedule.created` - Scheduled changes
+    - `subscription_schedule.updated` - Schedule modified
+  </Accordion>
+  
+  <Accordion title="Invoice Events">
+    - `invoice.created` - New invoice generated
+    - `invoice.payment_succeeded` - Invoice paid
+    - `invoice.payment_failed` - Invoice payment failed
+    - `invoice.upcoming` - Upcoming invoice (7 days)
+    - `invoice.finalized` - Invoice finalized
+  </Accordion>
+  
+  <Accordion title="Customer Events">
+    - `customer.created` - New customer account
+    - `customer.updated` - Customer information changed
+    - `customer.deleted` - Customer account deleted
+    - `payment_method.attached` - Payment method added
+    - `payment_method.detached` - Payment method removed
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+### Common Issues
+
+<AccordionGroup>
+  <Accordion title="Webhook not receiving events">
+    **Check these settings:**
+    - Verify the webhook URL is correct in Stripe Dashboard
+    - Ensure the webhook endpoint is enabled in Stripe
+    - Check that relevant events are selected in Stripe
+    - Verify the webhook is active in Pager
+    
+    **Debug steps:**
+    - Use Stripe's "Send test webhook" feature
+    - Check webhook attempt logs in Stripe Dashboard
+    - Review Pager webhook logs for delivery status
+  </Accordion>
+  
+  <Accordion title="Signature verification errors">
+    **Common causes:**
+    - Incorrect signing secret in Pager
+    - Signing secret mismatch between Stripe and Pager
+    - Webhook payload modified in transit
+    
+    **Solutions:**
+    - Copy the signing secret exactly from Stripe (starts with `whsec_`)
+    - Regenerate signing secret in Stripe if needed
+    - Ensure no middleware modifies the webhook payload
+  </Accordion>
+  
+  <Accordion title="Missing signing secret">
+    **If you see 'Setup Required' status:**
+    - The webhook was created without a signing secret
+    - Edit the webhook in Pager to add the signing secret
+    - Copy the secret from your Stripe webhook endpoint settings
+  </Accordion>
+  
+  <Accordion title="Too many notifications">
+    **Optimization strategies:**
+    - Reduce selected events to essential ones only
+    - Create separate channels for different event types
+    - Use Stripe's event filtering capabilities
+    - Consider digest notifications for high-volume events
+  </Accordion>
+</AccordionGroup>
+
+### Testing Webhook Delivery
+
+<Steps>
+  <Step title="Stripe Dashboard Test">
+    Use Stripe's built-in test webhook feature in the webhook endpoint settings
+  </Step>
+  
+  <Step title="Test Environment Events">
+    Trigger real events in your Stripe test environment:
+    - Create test payments using test credit cards
+    - Create and modify test subscriptions
+    - Process test refunds
+  </Step>
+  
+  <Step title="Monitor Delivery">
+    - Check Stripe's webhook attempt logs
+    - Verify notifications appear in Pager
+    - Review delivery timing and formatting
+  </Step>
+</Steps>
+
+## Best Practices
+
+### Security
+- **Always use signing secrets** to verify webhook authenticity
+- **Monitor webhook endpoints** for unusual activity patterns
+- **Rotate secrets periodically** as part of security maintenance
+- **Use HTTPS endpoints** (Pager handles this automatically)
+
+### Event Management
+- **Start with essential events** and add more gradually
+- **Separate critical alerts** from informational notifications
+- **Use different channels** for different event types or environments
+- **Filter high-volume events** to prevent notification overload
+
+### Business Intelligence
+- **Track key metrics** like MRR, churn rate, and payment success rates
+- **Set up alerts** for critical business events (high-value cancellations)
+- **Monitor payment failures** to identify issues early
+- **Use subscription events** for customer success workflows
+
+### Team Coordination
+- **Route payment failures** to support teams immediately
+- **Share revenue milestones** with the entire team
+- **Alert finance teams** to refunds and disputes
+- **Notify customer success** about subscription changes
+
+## Multiple Account Setup
+
+For organizations with multiple Stripe accounts:
+
+<Tabs>
+  <Tab title="Separate Workspaces">
+    **Best for**: Completely separate business units
+    
+    Use different Pager workspaces for each Stripe account to maintain complete isolation.
+  </Tab>
+  
+  <Tab title="Different Channels">
+    **Best for**: Related businesses or environments
+    
+    Use the same Pager workspace but route webhooks to different channels based on the Stripe account.
+  </Tab>
+  
+  <Tab title="Naming Convention">
+    **Recommended naming:**
+    - `#payments-prod-us` - US production payments
+    - `#payments-prod-eu` - EU production payments
+    - `#payments-test` - All test environments
+  </Tab>
+</Tabs>
+
+---
+
+<CardGroup cols={2}>
+  <Card title="Next Integration" icon="arrow-right" href="/integrations/webhooks/linear">
+    Set up Linear webhook integration
+  </Card>
+  
+  <Card title="Custom Webhooks" icon="webhook" href="/integrations/webhooks/custom">
+    Learn about custom webhook configurations
+  </Card>
+</CardGroup>
