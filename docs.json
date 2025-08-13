@@ -125,12 +125,7 @@
         "label": "App",
         "href": "https://app.pager.team"
       }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Get Started",
-      "href": "/quickstart"
-    }
+    ]
   },
   "contextual": {
     "options": [
